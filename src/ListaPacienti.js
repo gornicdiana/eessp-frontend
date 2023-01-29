@@ -1,6 +1,6 @@
 import { React, useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import { Table, Row, Col, Tooltip, Badge, Text, Modal, useModal, Button, Grid, Spacer, Collapse } from "@nextui-org/react";
+import { Table, Row, Col, Tooltip, Badge, Text, Modal, useModal, Button, Grid, Spacer, Collapse, Popover } from "@nextui-org/react";
 import { IconButton } from "./IconButtons";
 import { EyeIcon } from "./EyeIcon";
 import { EditIcon } from "./EditIcon";
@@ -11,6 +11,10 @@ function ListaPacienti({ token }) {
     const { setVisible, bindings } = useModal();
     const [raport, setRaport] = useState([]);
     const navigate = useNavigate();
+    // const [archive, setArchive] = useState(false);
+    const [confirm, setConfirm] = useState(false);
+    // const [deny, setDeny] = useState(false);
+
 
     useEffect(() => {
         fetch('http://localhost:5010/raports/myRaports', {
@@ -36,10 +40,10 @@ function ListaPacienti({ token }) {
         { label: "Actiuni rapide", key: "actions" }
     ];
 
-    async function getRaportData (cnp){
+    async function getRaportData(cnp) {
         const response = await fetch('http://localhost:5010/raports/raport', {
             method: 'GET',
-            headers: {authorization: cnp}
+            headers: { authorization: cnp }
         });
         const data = await response.json();
         setRaport(data);
@@ -48,6 +52,32 @@ function ListaPacienti({ token }) {
         return raport;
     };
 
+    async function archiveRaport(cnp) {
+        debugger;
+        const arch = await fetch('http://localhost:5010/raports/archive', {
+            method: 'PUT',
+            headers: { authorization: cnp },
+        });
+        const data = await arch.json();
+        console.log(data);
+        debugger;
+        return true;
+    }
+
+    // async function deletePacient(cnp) {
+    //     debugger;
+    //     // const response = await fetch('http://localhost:5010/raports/delete', {
+    //     //     method: 'DELETE',
+    //     //     headers: { 'Content-Type': 'application/json' },
+    //     //     body: {"cnp": cnp}
+    //     // })
+    //     // debugger;
+    //     // const confirm = response;
+    //     // console.log(confirm);
+    //     // debugger;
+    //     // return confirm;
+    // };
+
     async function seeRaport(cnp) {
         const info = await getRaportData(cnp);
         setVisible(true);
@@ -55,77 +85,104 @@ function ListaPacienti({ token }) {
 
     async function editRaport(cnp) {
         const info = await getRaportData(cnp);
-        navigate("/", {state: {raport}}); 
-    } 
-
-    async function deletePacient(cnp) {
-        const response = await fetch('http://localhost:5010/pacients/delete', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: cnp
-        })
-        const confirm = await response;
-        console.log(confirm);
-        debugger;
+        navigate("/", { state: { raport, token } });
     };
+
+    async function deleteRaport(cnp) {
+        debugger;
+        const info = await archiveRaport(cnp);
+        const refresh = () => window.location.reload(true)
+    };
+
 
     const renderCell = (user, columnKey) => {
         const cellValue = user[columnKey];
         let today = new Date();
         let dataInt = new Date(user.dataInt);
         let dataExt = new Date(user.dataExt);
+        let flag = user.flag;
         switch (columnKey) {
             case "lastname":
                 return (
-                    <Text>{user.lastname}</Text>
+                    <Text color={flag == true ? "#B5B4B8" : "#050505"}>{user.lastname}</Text>
                 );
             case "firstname":
                 return (
-                    <Text>{user.firstname}</Text>
+                    <Text color={flag == true ? "#B5B4B8" : "#050505"}>{user.firstname}</Text>
                 );
             case "cnp":
                 return (
-                    <Text>{user.cnp}</Text>
+                    <Text color={flag == true ? "#B5B4B8" : "#050505"}>{user.cnp}</Text>
                 );
             case "dataInt":
                 return (
-                    <Text>{dataInt.toDateString()}</Text>
+                    <Text color={flag == true ? "#B5B4B8" : "#050505"}>{dataInt.toDateString()}</Text>
                 );
             case "dataExt":
                 return (
-                    <Text>{dataExt.toDateString()}</Text>
+                    <Text color={flag == true ? "#B5B4B8" : "#050505"}>{dataExt.toDateString()}</Text>
                 );
             case "status":
-                if (dataExt <= today)
-                    return <Badge color="success" variant="flat" size="md">Externat</Badge>;
-                else
-                    return <Badge color="error" variant="flat">Internat</Badge>;
+                if (flag == true)
+                    return <Badge color="primary" variant="flat" size="md">Arhivat</Badge>;
+                else {
+                    if (dataExt <= today)
+                        return <Badge color="success" variant="flat" size="md">Externat</Badge>;
+                    else
+                        return <Badge color="error" variant="flat">Internat</Badge>;
+                }
             case "actions":
                 return (
-                    <Row justify="start" align="start">
+                    <Row justify="start" align="start" >
                         <Col css={{ d: "flex" }}>
                             <Tooltip content="Detalii">
-                                <IconButton onClick={() => seeRaport(user.cnp)}>
-                                    <EyeIcon size={20} fill="#979797" />
+                                <IconButton disabled={flag} onClick={() => seeRaport(user.cnp)}>
+                                    <EyeIcon size={20} fill={flag == true ? "#B5B4B8" : "#337EFF"} />
                                 </IconButton>
                             </Tooltip>
                         </Col>
                         <Col css={{ d: "flex" }}>
                             <Tooltip content="Editare pacient">
-                                <IconButton onClick={() => editRaport(user.cnp)}>
-                                    <EditIcon size={20} fill="#979797" />
+                                <IconButton disabled={flag} onClick={() => editRaport(user.cnp)}>
+                                    <EditIcon size={20} fill={flag == true ? "#B5B4B8" : "#1DB835"} />
                                 </IconButton>
                             </Tooltip>
                         </Col>
                         <Col css={{ d: "flex" }}>
-                            <Tooltip
-                                content="Stergere pacient"
-                                color="error"
-                            >
-                                <IconButton onClick={deletePacient(user.cnp)}>
-                                    <DeleteIcon size={20} fill="#FF0080" />
-                                </IconButton>
-                            </Tooltip>
+                            <Popover>
+                                <Popover.Trigger>
+                                    <IconButton disabled={flag} >
+                                        <DeleteIcon size={20} fill={flag == true ? "#B5B4B8" : "#FF0080"} />
+                                    </IconButton>
+                                </Popover.Trigger>
+                                <Popover.Content>
+                                    <Grid.Container
+                                        css={{ borderRadius: "14px", padding: "0.75rem", maxWidth: "330px" }}
+                                    >
+                                        <Row justify="center" align="center">
+                                            <Text b>Confirmare arhivare raport</Text>
+                                        </Row>
+                                        <Row>
+                                            <Text>
+                                                Sunteti digur ca doriti sa arhivati raportul acestui pacient?
+                                            </Text>
+                                        </Row>
+                                        <Grid.Container justify="space-between" alignContent="center">
+                                            <Grid>
+                                                <Button size="sm" light >
+                                                    Nu
+                                                </Button>
+                                            </Grid>
+                                            <Grid>
+                                                <Button size="sm" shadow color="error" onClick={() => deleteRaport(user.cnp)}>
+                                                    Da
+                                                </Button>
+                                            </Grid>
+                                        </Grid.Container>
+                                    </Grid.Container>
+                                </Popover.Content>
+                            </Popover>
+
                         </Col>
                     </Row>
                 );
@@ -247,11 +304,36 @@ function ListaPacienti({ token }) {
                     <Button auto flat color="error" onClick={() => setVisible(false)}>
                         Close
                     </Button>
-                    <Button auto onClick={() => { editRaport()}}>
+                    <Button auto onClick={() => { editRaport() }}>
                         Print
                     </Button>
                 </Modal.Footer>
             </Modal>
+
+            {/* <Modal
+                width="600px"
+                aria-labelledby="modalArchive-title"
+                aria-describedby="modalArchive-description"
+                {...bindings}
+                open={archive}
+            >
+                <Modal.Header>
+                    <Text id="modal-title" size={18}>
+                        ARHIVARE RAPORT
+                    </Text>
+                </Modal.Header>
+                <Modal.Body>
+                    <Text>Sunteti sigur ca doriti sa arhivati raportul?</Text>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button auto flat color="error" onClick={() => setConfirm(true)}>
+                        Da
+                    </Button>
+                    <Button auto onClick={() => setDeny(true)}>
+                        Nu
+                    </Button>
+                </Modal.Footer>
+            </Modal> */}
         </>
     );
 };

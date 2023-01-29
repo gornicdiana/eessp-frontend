@@ -22,7 +22,7 @@ function App() {
       <Container>
         <Router>
           <Routes>
-              <Route path="/" element={<Rapoarte />} />
+              <Route path="/" element={<Rapoarte token={token}/>} />
               <Route path="/pacienti" element={<ListaPacienti token={token}/>} />
               <Route path="/profil" element={<ProfilDoctor token={token}/>} />
           </Routes>

@@ -4,6 +4,7 @@ import { Grid, Text, Input, Dropdown, Spacer, Textarea, Tooltip, Button, Contain
 
 const getSexState = (cnp) => {
     if(cnp) {
+        debugger;
         return validateCNP(cnp).sex;
     }
     else {
@@ -26,6 +27,7 @@ const validateCNP = (cnp) => {
         dataNastere = getDataCNP(cnp);
         judet = getJudetCNP(cnp);
     }
+    debugger;
     return { "sex": sex, "dataNastere":dataNastere, "judet":judet };
 }
 
@@ -102,7 +104,7 @@ function getJudetCNP(cnp) {
 
 }
 
-function Raport({ raport }) {
+function Raport({ raport, token }) {
 
     const [selectSex, setSelectSex] = useState(getSexState(raport.cnp));
     const [selectVarsta, setSelectVarsta] = useState(getVarstaState(raport.cnp));
@@ -110,6 +112,24 @@ function Raport({ raport }) {
     const [selectRh, setSelectRh] = useState('Select');
     const [selectStare, setSelectStare] = useState('Select');
     const [selectNastere, setSelectNastere] = useState('Select');
+
+    async function saveNewRaportData() {
+        debugger;
+        const response = await fetch('http://localhost:5010/raports/add', {
+            method: 'POST',
+            headers: { authorization: token }
+        });
+        // const data = await response.json();
+        // setRaport(data);
+        debugger;
+        console.log(">>>>>", raport);
+        return raport;
+    };
+
+    function saveNewRaport() {
+        debugger;
+        console.log("raport: ", raport);
+    }
     
 
     return (
@@ -119,16 +139,16 @@ function Raport({ raport }) {
                 <Collapse title="Informatii Generale Pacient" expanded shadow>
                     <Grid.Container gap={6} justify="space-evenly">
                         <Grid>
-                            <Input type='Text' required={true} helperColor="warning" underlined labelPlaceholder="Nume" value={raport.lastname} onChange={e => raport.lastname = e.target.value} />
+                            <Input type='Text' required={true} helperColor="warning" underlined labelPlaceholder="Nume" initialValue={raport.lastname} onChange={e => raport.lastname = e.target.value} />
                             <Spacer y={3} />
-                            <Input type='Text' required={true} underlined labelPlaceholder="Prenume" value={raport.firstname} onChange={e => raport.firstname = e.target.value} />
+                            <Input type='Text' required={true} underlined labelPlaceholder="Prenume" initialValue={raport.firstname} onChange={e => raport.firstname = e.target.value} />
                             <Spacer y={3} />
-                            <Input type='Text' required={true} underlined labelPlaceholder="Serie si numar buletin" value={raport.serieNr} onChange={e => raport.serieNr = e.target.value} />
+                            <Input type='Text' required={true} underlined labelPlaceholder="Serie si numar buletin" initialValue={raport.serieNr} onChange={e => raport.serieNr = e.target.value} />
                         </Grid>
                         <Grid alignItems='flex-start'>
-                            <Input type='Text' required={true} underlined labelPlaceholder="CNP" value={raport.cnp} onChange={e => raport.cnp = e.target.value} />
+                            <Input type='Text' required={true} underlined labelPlaceholder="CNP" initialValue={raport.cnp} onChange={e => raport.cnp = e.target.value} />
                             <Spacer y={3} />
-                            <Input type='Text' required={true} underlined labelPlaceholder="Varsta" value={selectVarsta} onChange={e => raport.varsta = e.target.value}  />
+                            <Input type='Text' required={true} underlined labelPlaceholder="Varsta" initialValue={selectVarsta} onChange={e => raport.varsta = e.target.value}  />
                             <Spacer y={1} />
                             <Text>Sex</Text>
                             <Dropdown>
@@ -144,7 +164,7 @@ function Raport({ raport }) {
                             </Dropdown>
                         </Grid>
                         <Grid>
-                            <Input type='Text' underlined labelPlaceholder="Alergic la" value={raport.alergic} onChange={e => raport.alergic = e.target.value} />
+                            <Input type='Text' underlined labelPlaceholder="Alergic la" initialValue={raport.alergic} onChange={e => raport.alergic = e.target.value} />
                             <Spacer y={1} />
                             <Text>Grup sanguin</Text>
                             <Dropdown>
@@ -177,11 +197,11 @@ function Raport({ raport }) {
                             </Dropdown>
                         </Grid>
                         <Grid>
-                            <Input type='Text' underlined required={true} labelPlaceholder="Adresa" value={raport.address} onChange={e => raport.address = e.target.value} />
+                            <Input type='Text' underlined required={true} labelPlaceholder="Adresa" initialValue={raport.address} onChange={e => raport.address = e.target.value} />
                             <Spacer y={3} />
-                            <Input type='Text' underlined labelPlaceholder="Numar de telefon" value={raport.phone} onChange={e => raport.phone = e.target.value} />
+                            <Input type='Text' underlined labelPlaceholder="Numar de telefon" initialValue={raport.phone} onChange={e => raport.phone = e.target.value} />
                             <Spacer y={3} />
-                            <Input type='Text' underlined labelPlaceholder="Email" value={raport.email} onChange={e => raport.email = e.target.value} />
+                            <Input type='Text' underlined labelPlaceholder="Email" initialValue={raport.email} onChange={e => raport.email = e.target.value} />
                         </Grid>
                     </Grid.Container>
                 </Collapse>
@@ -193,8 +213,8 @@ function Raport({ raport }) {
                             underlined
                             color="primary"
                             labelPlaceholder="Diagnostic de trimitere "
-                            value={raport.diagTrimitere}
-                            onChange={e => raport.diagPr = e.target.value}
+                            initialValue={raport.diagTrimitere}
+                            onChange={e => raport.diagTrimitere = e.target.value}
                         />
                         <Spacer y={3} />
                         <Textarea
@@ -202,7 +222,7 @@ function Raport({ raport }) {
                             color="primary"
                             required={true}
                             labelPlaceholder="Diagnostic la internare"
-                            value={raport.diagInt}
+                            initialValue={raport.diagInt}
                             onChange={e => raport.diagInt = e.target.value}
                         />
                         <Spacer y={3} />
@@ -210,7 +230,7 @@ function Raport({ raport }) {
                             underlined
                             color="primary"
                             labelPlaceholder="Diagnostic la 72 de ore"
-                            value={raport.diag72}
+                            initialValue={raport.diag72}
                             onChange={e => raport.diag72 = e.target.value}
                         />
                     </Grid.Container>
@@ -226,7 +246,7 @@ function Raport({ raport }) {
                                 color="primary"
                                 required={true}
                                 labelPlaceholder="Diagnostic principal"
-                                value={raport.diagPr}
+                                initialValue={raport.diagPr}
                                 onChange={e => raport.diagExt = e.target.value}
                             />
                             <Spacer y={3} />
@@ -234,7 +254,7 @@ function Raport({ raport }) {
                                 underlined
                                 color="primary"
                                 labelPlaceholder="Boli concomitente"
-                                value={raport.boliConcomitente}
+                                initialValue={raport.boliConcomitente}
                                 onChange={e => raport.boalaInt = e.target.value}
                             />
                         </Grid>
@@ -245,7 +265,7 @@ function Raport({ raport }) {
                                 underlined
                                 color="primary"
                                 labelPlaceholder="Tehnica operatorie"
-                                value={raport.tehnica}
+                                initialValue={raport.tehnica}
                                 onChange={e => raport.tehnica = e.target.value}
                             />
                             <Spacer y={3} />
@@ -253,7 +273,7 @@ function Raport({ raport }) {
                                 underlined
                                 color="primary"
                                 labelPlaceholder="Boala pentru care s-a efectuat"
-                                value={raport.boalaInt}
+                                initialValue={raport.boalaInt}
                                 onChange={e => raport.boalaInt = e.target.value}
                             />
                             <Spacer y={1} />
@@ -262,7 +282,7 @@ function Raport({ raport }) {
                                 type="date"
                                 underlined
                                 label="Data interventiei"
-                                value={raport.dataInterventie}
+                                initialValue={raport.dataInterventie}
                                 onChange={e => raport.dataInterventie = e.target.value}
                             />
                         </Grid>
@@ -292,7 +312,7 @@ function Raport({ raport }) {
                                     type="text"
                                     underlined
                                     tooltip="Se completeaza numai daca starea la externare este transferat"
-                                    value={raport.transfer}
+                                    initialValue={raport.transfer}
                                     onChange={e => raport.transfer = e.target.value}
                                 />
                             </Tooltip>
@@ -302,7 +322,7 @@ function Raport({ raport }) {
                                     underlined
                                     // disabled={selectStare == 'decedat' ? false : true}
                                     color="primary"
-                                    value={raport.diagDeces}
+                                    initialValue={raport.diagDeces}
                                     onChange={e => raport.diagDeces = e.target.value}
                                     labelPlaceholder="Diagnostic la deces"
                                 />
@@ -316,7 +336,7 @@ function Raport({ raport }) {
                                 type="number"
                                 underlined
                                 labelPlaceholder="Varsta tatalui"
-                                value={raport.varstaTata}
+                                initialValue={raport.varstaTata}
                                 onChange={e => raport.varstaTata = e.target.value}
                             />
                             <Spacer y={3} />
@@ -325,7 +345,7 @@ function Raport({ raport }) {
                                 type="number"
                                 underlined
                                 labelPlaceholder="Varsta mamei"
-                                value={raport.varstaMama}
+                                initialValue={raport.varstaMama}
                                 onChange={e => raport.varstaMama = e.target.value}
                             />
                             <Spacer y={3} />
@@ -334,7 +354,7 @@ function Raport({ raport }) {
                                 type="text"
                                 underlined
                                 labelPlaceholder="Alte afectiuni sau noxe"
-                                value={raport.alteAfectiuni}
+                                initialValue={raport.alteAfectiuni}
                                 onChange={e => raport.alteAfectiuni = e.target.value}
                             />
                             <Spacer y={3} />
@@ -343,7 +363,7 @@ function Raport({ raport }) {
                                 type="text"
                                 underlined
                                 labelPlaceholder="Evolutia sarcinii"
-                                value={raport.evolutieSarcina}
+                                initialValue={raport.evolutieSarcina}
                                 onChange={e => raport.evolutieSarcina = e.target.value}
                             />
                             <Spacer y={3} />
@@ -352,7 +372,7 @@ function Raport({ raport }) {
                                 type="text"
                                 underlined
                                 labelPlaceholder="Numar controale prenatale"
-                                value={raport.nrControale}
+                                initialValue={raport.nrControale}
                                 onChange={e => raport.nrControale = e.target.value}
                             />
                         </Grid>
@@ -362,7 +382,7 @@ function Raport({ raport }) {
                                 type="number"
                                 underlined
                                 labelPlaceholder="Al catelea copil"
-                                value={raport.nrCopii}
+                                initialValue={raport.nrCopii}
                                 onChange={e => raport.nrCopii = e.target.value}
                             />
                             <Spacer y={3} />
@@ -371,7 +391,7 @@ function Raport({ raport }) {
                                 type="number"
                                 underlined
                                 labelPlaceholder="Nascut la numarul de luni"
-                                value={raport.nrLuni}
+                                initialValue={raport.nrLuni}
                                 onChange={e => raport.nrLuni = e.target.value}
                             />
                             <Spacer y={3} />
@@ -380,7 +400,7 @@ function Raport({ raport }) {
                                 type="number"
                                 underlined
                                 labelPlaceholder="Greutate (gr)"
-                                value={raport.greutateCopil}
+                                initialValue={raport.greutateCopil}
                                 onChange={e => raport.greutateCopil = e.target.value}
                             />
                             <Spacer y={3} />
@@ -389,7 +409,7 @@ function Raport({ raport }) {
                                 type="number"
                                 underlined
                                 labelPlaceholder="Lungime (cm)"
-                                value={raport.lungime}
+                                initialValue={raport.lungime}
                                 onChange={e => raport.lungime = e.target.value}
                             />
                             <Spacer y={1} />
@@ -412,7 +432,7 @@ function Raport({ raport }) {
                                 type="date"
                                 underlined
                                 label="Data interventiei"
-                                value={raport.dataNastere}
+                                initialValue={raport.dataNastere}
                                 onChange={e => raport.dataNastere = e.target.value}
                             />
                         </Grid>
@@ -427,7 +447,7 @@ function Raport({ raport }) {
                                 underlined
                                 color="primary"
                                 labelPlaceholder="Istoric"
-                                value={raport.istoric}
+                                initialValue={raport.istoric}
                                 onChange={e => raport.istoric = e.target.value}
                             />
                             <Spacer y={3} />
@@ -437,7 +457,7 @@ function Raport({ raport }) {
                                 type="number"
                                 required={true}
                                 labelPlaceholder="Temperatura (grade Celsius)"
-                                value={raport.temperatura}
+                                initialValue={raport.temperatura}
                                 onChange={e => raport.temperatura = e.target.value}
                             />
                             <Spacer y={3} />
@@ -447,7 +467,7 @@ function Raport({ raport }) {
                                 type="number"
                                 required={true}
                                 labelPlaceholder="Greutate (kg)"
-                                value={raport.greutate}
+                                initialValue={raport.greutate}
                                 onChange={e => raport.greutate = e.target.value}
                             />
                         </Grid>
@@ -456,7 +476,7 @@ function Raport({ raport }) {
                                 underlined
                                 color="primary"
                                 labelPlaceholder="Rezultatele investigatiilor interdisciplinare"
-                                value={raport.rezInter}
+                                initialValue={raport.rezInter}
                                 onChange={e => raport.rezInter = e.target.value}
                             />
                             <Spacer y={2} />
@@ -465,7 +485,7 @@ function Raport({ raport }) {
                                 color="primary"
                                 required={true}
                                 labelPlaceholder="Starea prezenta"
-                                value={raport.starePrez}
+                                initialValue={raport.starePrez}
                                 onChange={e => raport.starePrez = e.target.value}
                             />
                             <Spacer y={2} />
@@ -474,7 +494,7 @@ function Raport({ raport }) {
                                 color="primary"
                                 required={true}
                                 labelPlaceholder="Prescriptia medicatiei si a investigatiilor"
-                                value={raport.prescriptie}
+                                initialValue={raport.prescriptie}
                                 onChange={e => raport.prescriptie = e.target.value}
                             />
                             <Spacer y={2} />
@@ -482,7 +502,7 @@ function Raport({ raport }) {
                                 underlined
                                 color="primary"
                                 labelPlaceholder="Evolutie"
-                                value={raport.evolutie}
+                                initialValue={raport.evolutie}
                                 onChange={e => raport.evolutie = e.target.value}
                             />
                         </Grid>
@@ -491,7 +511,7 @@ function Raport({ raport }) {
             </Collapse.Group>
             <Spacer y={2} />
             <Container justify='flex-end'>
-                <Button flat color="success" auto justify='flex-end' >
+                <Button flat color="success" auto justify='flex-end' onClick={() => saveNewRaport()}>
                     Salvare
                 </Button>
             </Container>
