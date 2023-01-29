@@ -46,10 +46,8 @@ function ListaPacienti({ token }) {
             headers: { authorization: cnp }
         });
         const data = await response.json();
-        setRaport(data);
-        debugger;
-        console.log(">>>>>", raport);
-        return raport;
+        console.log(">>>>>", data);
+        return data;
     };
 
     async function archiveRaport(cnp) {
@@ -84,8 +82,8 @@ function ListaPacienti({ token }) {
     };
 
     async function editRaport(cnp) {
-        const info = await getRaportData(cnp);
-        navigate("/", { state: { raport, token } });
+        const raport = await getRaportData(cnp);
+        navigate("/", { state: { raport: raport} });
     };
 
     async function deleteRaport(cnp) {

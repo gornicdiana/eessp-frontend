@@ -1,10 +1,9 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
 import {useLocation} from 'react-router-dom';
 import Raport from './Raport';
 
 
-function Rapoarte() {
+function Rapoarte({token}) {
   const editRaport = useLocation().state;
   const newRaport = editRaport==null ? null : editRaport.raport;
 
@@ -55,8 +54,8 @@ function Rapoarte() {
   return (
     <>
     {editRaport == null ?
-      <Raport raport={raport}/>
-    : <Raport raport={newRaport} />
+      <Raport raport={raport} token={token}/>
+    : <Raport raport={newRaport} token={token}/>
     }
     </>
   );

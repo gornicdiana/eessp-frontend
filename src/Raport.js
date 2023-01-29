@@ -117,7 +117,7 @@ function Raport({ raport, token }) {
         debugger;
         const response = await fetch('http://localhost:5010/raports/add', {
             method: 'POST',
-            headers: { authorization: token }
+            headers: { }
         });
         // const data = await response.json();
         // setRaport(data);
