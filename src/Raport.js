@@ -115,7 +115,7 @@ function Raport({ raport, token }) {
     const { setVisible, bindings } = useModal();
 
     const validateFields = () => { 
-        if (validateCNP(cnp) == true && validateEmail(email) == true && validateFname(fname) == true && validateLname(lname) == true && validateSerie(serie) == true) {
+        if (validateCNP(cnp) == true && validateFname(fname) == true && validateLname(lname) == true && validateSerie(serie) == true) {
             debugger;
             return true;
         }
@@ -126,32 +126,42 @@ function Raport({ raport, token }) {
     };
 
     const validateEmail = (email) => {
-        if (email.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i))
+        if (email.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i)) {
+            raport.email = email;
             return true;
+        }
         else return false;
     };
 
     const validateCNP = (cnp) => {
-        if (cnp.length == 13)
+        if (cnp.length == 13) {
+            raport.cnp = cnp;
             return true;
+        }
         else return false;
     };
 
     const validateFname = (fname) => {
-        if (fname.match(/^[a-zA-Z]{3}/i))
+        if (fname.match(/^[a-zA-Z]{3}/i)){
+            raport.firstname = fname;
             return true;
+        }
         else return false;    
     };
 
     const validateLname = (lname) => {
-        if (lname.match(/^[a-zA-Z0-9]{3}/i))
+        if (lname.match(/^[a-zA-Z0-9]{3}/i)){
+            raport.lastname = lname;
             return true;
+        }
         else return false;    
     };
 
     const validateSerie = (serie) => {
-        if (serie.match(/^[A-Z]{2}\d{6}/i))
+        if (serie.match(/^[A-Z]{2}\d{6}/i)){
+            raport.serieNr = serie;
             return true;
+        }
         else return false;    
     };
 
@@ -224,6 +234,7 @@ function Raport({ raport, token }) {
 
 
     async function saveNewRaportData() {
+        debugger;
         const response = await fetch('http://localhost:5010/raports/add', {
             method: 'POST',
             headers: { authorization: token },
@@ -644,7 +655,7 @@ function Raport({ raport, token }) {
             >
                 <Modal.Header>
                     <Text id="modal-title" size={18}>
-                        Completare raport gresita
+                        Completare gresita raport
                     </Text>
                 </Modal.Header>
                 <Modal.Body>
