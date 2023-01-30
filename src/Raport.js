@@ -1,11 +1,10 @@
-import { React, useState } from 'react';
-import { Grid, Text, Input, Dropdown, Spacer, Textarea, Tooltip, Button, Container, Collapse } from "@nextui-org/react";
+import { React, useState, useMemo } from 'react';
+import { Grid, Text, Input, Dropdown, Spacer, Textarea, Tooltip, Button, Container, Collapse, useInput, useModal, Modal } from "@nextui-org/react";
 
 
 const getSexState = (cnp) => {
-    if(cnp) {
-        debugger;
-        return validateCNP(cnp).sex;
+    if (cnp) {
+        return getCNPinfo(cnp).sex;
     }
     else {
         return 'Select';
@@ -13,22 +12,20 @@ const getSexState = (cnp) => {
 }
 
 const getVarstaState = (cnp) => {
-    if(cnp) {
-        return validateCNP(cnp).dataNastere;
+    if (cnp) {
+        return getCNPinfo(cnp).dataNastere;
     }
-    
+
 }
 
-
-const validateCNP = (cnp) => {
-    let sex, dataNastere, judet = ''
+const getCNPinfo = (cnp) => {
+    let sex, dataNastere;
     if (cnp.length == 13) {
         sex = getSexFromCNP(cnp);
         dataNastere = getDataCNP(cnp);
-        judet = getJudetCNP(cnp);
     }
-    debugger;
-    return { "sex": sex, "dataNastere":dataNastere, "judet":judet };
+    console.log(sex, dataNastere);
+    return { "sex": sex, "dataNastere": dataNastere };
 }
 
 function getSexFromCNP(cnp) {
@@ -100,10 +97,6 @@ function getDataCNP(cnp) {
     return data;
 }
 
-function getJudetCNP(cnp) {
-
-}
-
 function Raport({ raport, token }) {
 
     const [selectSex, setSelectSex] = useState(getSexState(raport.cnp));
@@ -113,24 +106,149 @@ function Raport({ raport, token }) {
     const [selectStare, setSelectStare] = useState('Select');
     const [selectNastere, setSelectNastere] = useState('Select');
 
+    const { value: email, reset: emailReset, bindings: emailBinding } = useInput("");
+    const { value: cnp, reset: cnpReset, bindings: cnpBinding  } = useInput("");
+    const { value: serie, reset: serieReset, bindings: serieBinding  } = useInput("");
+    const { value: fname, reset: fnameReset, bindings: fnameBinding  } = useInput("");
+    const { value: lname, reset: lnameReset, bindings: lnameBinding  } = useInput("");
+
+    const { setVisible, bindings } = useModal();
+
+    const validateFields = () => { 
+        if (validateCNP(cnp) == true && validateEmail(email) == true && validateFname(fname) == true && validateLname(lname) == true && validateSerie(serie) == true) {
+            debugger;
+            return true;
+        }
+        else {
+            debugger;
+            return false;
+        }
+    };
+
+    const validateEmail = (email) => {
+        if (email.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i))
+            return true;
+        else return false;
+    };
+
+    const validateCNP = (cnp) => {
+        if (cnp.length == 13)
+            return true;
+        else return false;
+    };
+
+    const validateFname = (fname) => {
+        if (fname.match(/^[a-zA-Z]{3}/i))
+            return true;
+        else return false;    
+    };
+
+    const validateLname = (lname) => {
+        if (lname.match(/^[a-zA-Z0-9]{3}/i))
+            return true;
+        else return false;    
+    };
+
+    const validateSerie = (serie) => {
+        if (serie.match(/^[A-Z]{2}\d{6}/i))
+            return true;
+        else return false;    
+    };
+
+    const helperEmail = useMemo(() => {
+        if (!email)
+            return {
+                text: "",
+                color: "",
+            };
+        const isValidEmail = validateEmail(email);
+        return {
+            text: isValidEmail == true ? "" : "Introduceti o adresa de email valida",
+            color: isValidEmail == true ? "" : "error",
+        };
+        
+    }, [email]);
+
+    const helperCNP = useMemo(() => {
+        if (!cnp)
+            return {
+                text: "",
+                color: "",
+            };
+        const isValidCNP = validateCNP(cnp);
+        return {
+            text: isValidCNP == true ? "" : "Introduceti in CNP valid",
+            color: isValidCNP == true ? "" : "error",
+        };
+        
+    }, [cnp]);
+
+    const helperLname = useMemo(() => {
+        if (!lname)
+            return {
+                text: "",
+                color: "",
+            };
+        const isValidLname = validateLname(lname);
+        return {
+            text: isValidLname ? "" : "Acest camp trebuie completat cu numele",
+            color: isValidLname ? "" : "error",
+        };
+    }, [lname]);
+    
+    const helperFname = useMemo(() => {
+        if (!fname)
+            return {
+                text: "",
+                color: "",
+            };
+        const isValidFname = validateFname(fname);
+        return {
+            text: isValidFname ? "" : "Acest camp trebuie completat cu prenumele",
+            color: isValidFname ? "" : "error",
+        };
+    }, [fname]);
+
+    const helperSerie = useMemo(() => {
+        if (!serie)
+            return {
+                text: "",
+                color: "",
+            };
+        const isValidSerie = validateSerie(serie);
+        return {
+            text: isValidSerie ? "" : "Acest camp trebuie completat",
+            color: isValidSerie ? "" : "error",
+        };
+    }, [serie]);
+
+
     async function saveNewRaportData() {
-        debugger;
         const response = await fetch('http://localhost:5010/raports/add', {
             method: 'POST',
-            headers: { }
+            headers: { authorization: token },
+            body: { raport: raport }
         });
         // const data = await response.json();
         // setRaport(data);
-        debugger;
         console.log(">>>>>", raport);
         return raport;
     };
 
-    function saveNewRaport() {
-        debugger;
+    async function saveNewRaport() {
         console.log("raport: ", raport);
+        if (validateFields() == true) {
+            debugger;
+            let saved = await saveNewRaportData(raport);
+        }
+        else {
+            debugger;
+            setVisible(true);
+        }
+        
+
     }
-    
+
 
     return (
         <>
@@ -139,16 +257,16 @@ function Raport({ raport, token }) {
                 <Collapse title="Informatii Generale Pacient" expanded shadow>
                     <Grid.Container gap={6} justify="space-evenly">
                         <Grid>
-                            <Input type='Text' required={true} helperColor="warning" underlined labelPlaceholder="Nume" initialValue={raport.lastname} onChange={e => raport.lastname = e.target.value} />
+                            <Input type='Text' {...lnameBinding} status={helperLname.color} color={helperLname.color} helperColor={helperLname.color} helperText={helperLname.text} underlined labelPlaceholder="Nume" />
                             <Spacer y={3} />
-                            <Input type='Text' required={true} underlined labelPlaceholder="Prenume" initialValue={raport.firstname} onChange={e => raport.firstname = e.target.value} />
+                            <Input type='Text' {...fnameBinding} status={helperFname.color} color={helperFname.color} helperColor={helperFname.color} helperText={helperFname.text} underlined labelPlaceholder="Prenume" />
                             <Spacer y={3} />
-                            <Input type='Text' required={true} underlined labelPlaceholder="Serie si numar buletin" initialValue={raport.serieNr} onChange={e => raport.serieNr = e.target.value} />
+                            <Input type='Text' {...serieBinding} status={helperSerie.color} color={helperSerie.color} helperColor={helperSerie.color} helperText={helperSerie.text} required={true} underlined labelPlaceholder="Serie si numar buletin" />
                         </Grid>
                         <Grid alignItems='flex-start'>
-                            <Input type='Text' required={true} underlined labelPlaceholder="CNP" initialValue={raport.cnp} onChange={e => raport.cnp = e.target.value} />
+                            <Input type='Text' {...cnpBinding} status={helperCNP.color} color={helperCNP.color} helperColor={helperCNP.color} helperText={helperCNP.text} underlined labelPlaceholder="CNP"  onBlur={(e) => getCNPinfo(e.target.value)}/>
                             <Spacer y={3} />
-                            <Input type='Text' required={true} underlined labelPlaceholder="Varsta" initialValue={selectVarsta} onChange={e => raport.varsta = e.target.value}  />
+                            <Input type='Text' required={true} underlined labelPlaceholder="Varsta" onChange={e => raport.varsta = e.target.value} />
                             <Spacer y={1} />
                             <Text>Sex</Text>
                             <Dropdown>
@@ -201,7 +319,7 @@ function Raport({ raport, token }) {
                             <Spacer y={3} />
                             <Input type='Text' underlined labelPlaceholder="Numar de telefon" initialValue={raport.phone} onChange={e => raport.phone = e.target.value} />
                             <Spacer y={3} />
-                            <Input type='Text' underlined labelPlaceholder="Email" initialValue={raport.email} onChange={e => raport.email = e.target.value} />
+                            <Input {...emailBinding} status={helperEmail.color} color={helperEmail.color} helperColor={helperEmail.color} helperText={helperEmail.text} type='email' underlined labelPlaceholder="Email" />
                         </Grid>
                     </Grid.Container>
                 </Collapse>
@@ -511,11 +629,36 @@ function Raport({ raport, token }) {
             </Collapse.Group>
             <Spacer y={2} />
             <Container justify='flex-end'>
-                <Button flat color="success" auto justify='flex-end' onClick={() => saveNewRaport()}>
+                <Button flat color="success" type='submit' auto justify='flex-end' onPress={() => saveNewRaport()}>
                     Salvare
                 </Button>
             </Container>
+
+
+
+            <Modal
+                width="600px"
+                aria-labelledby="modalArchive-title"
+                aria-describedby="modalArchive-description"
+                {...bindings}
+            >
+                <Modal.Header>
+                    <Text id="modal-title" size={18}>
+                        Completare raport gresita
+                    </Text>
+                </Modal.Header>
+                <Modal.Body>
+                    <Text>Cel putin unul dintre campuri este completat gresit.</Text>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button auto flat color="error" onClick={() => setVisible(false)}>
+                        Ok
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
+
+        
     );
 }
 
