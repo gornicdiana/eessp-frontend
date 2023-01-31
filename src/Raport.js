@@ -1,4 +1,5 @@
 import { React, useState, useMemo } from 'react';
+import { useNavigate } from "react-router-dom";
 import { Grid, Text, Input, Dropdown, Spacer, Textarea, Tooltip, Button, Container, Collapse, useInput, useModal, Modal } from "@nextui-org/react";
 
 
@@ -15,7 +16,6 @@ const getVarstaState = (cnp) => {
     if (cnp) {
         return getCNPinfo(cnp).dataNastere;
     }
-
 }
 
 const getCNPinfo = (cnp) => {
@@ -99,6 +99,8 @@ function getDataCNP(cnp) {
 
 function Raport({ raport, token }) {
 
+    const navigate = useNavigate();
+
     const [selectSex, setSelectSex] = useState(getSexState(raport.cnp));
     const [selectVarsta, setSelectVarsta] = useState(getVarstaState(raport.cnp));
     const [selectGrup, setSelectGrup] = useState('Select');
@@ -116,11 +118,9 @@ function Raport({ raport, token }) {
 
     const validateFields = () => { 
         if (validateCNP(cnp) == true && validateFname(fname) == true && validateLname(lname) == true && validateSerie(serie) == true) {
-            debugger;
             return true;
         }
         else {
-            debugger;
             return false;
         }
     };
@@ -234,30 +234,24 @@ function Raport({ raport, token }) {
 
 
     async function saveNewRaportData() {
-        debugger;
         const response = await fetch('http://localhost:5010/raports/add', {
             method: 'POST',
-            headers: { authorization: token },
-            body: { raport: raport }
+            headers: { authorization: token,
+                        'Content-Type': 'application/json', },
+            body: JSON.stringify(raport),
         });
-        // const data = await response.json();
-        // setRaport(data);
-        console.log(">>>>>", raport);
-        return raport;
+        return response;
     };
 
     async function saveNewRaport() {
         console.log("raport: ", raport);
         if (validateFields() == true) {
-            debugger;
             let saved = await saveNewRaportData(raport);
+            navigate("/pacienti");
         }
         else {
-            debugger;
             setVisible(true);
         }
-        
-
     }
 
 
